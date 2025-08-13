@@ -26,10 +26,10 @@ def sent_otp_email(email, otp):
     except Exception as e:
         logger.error(f"Failed to sent OTP to {email}: Error: {e}")
 
-def send_account_locked_email(user, email):
+def send_account_locked_email(user):
     subject = _("Your account has been locked")
     from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = [email]
+    recipient_list = [user.email]
     context = {
         "user": user,
         "lockout_duration": int(settings.LOCKOUT_DURATION.total_seconds() // 60),

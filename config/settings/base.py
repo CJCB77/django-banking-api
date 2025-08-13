@@ -39,7 +39,9 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    "core_apps.user_auth",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -139,6 +141,7 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+AUTH_USER_MODEL = "users.User"
 
 LOGGING_CONFIG = None # Avoid conflicts with loguru
 
