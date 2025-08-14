@@ -76,9 +76,6 @@ class CustomUser(AbstractUser):
         "security_question",
         "security_answer",
     ]
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
     
     def set_otp(self, otp: str)-> None:
         self.otp = otp,
@@ -110,7 +107,7 @@ class CustomUser(AbstractUser):
         self.save()
 
     def unlock_account(self) -> None:
-        if self.account_status == self.AccountStatus.LOCKED:
+        if self.is_locked:
             self.reset_failed_login_attempts()
     
     def unlock_if_expired(self) -> bool:
