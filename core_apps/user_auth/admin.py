@@ -33,8 +33,6 @@ class CustomUserAdmin(UserAdmin):
                     "middle_name",
                     "last_name",
                     "id_no",
-                    "security_question",
-                    "security_answer",
                 )
             },
         ),
