@@ -6,8 +6,11 @@ services:
     volumes:
       - .:/app:z
       - ./staticfiles:/app/staticfiles
-    ports:
-      - "8001:8001"
+    # ports:
+    #   - "8001:8001"
+    #Expose this port to all other containers
+    expose:
+      - "8001"
     env_file:
       - ./.envs/.env.local
     depends_on:
@@ -44,6 +47,22 @@ services:
       - MP_SMTP_AUTH_ALLOW_INSECURE=1
     networks:
       - banker_local_nw
+  
+  nginx:
+    build:
+      context: ./docker/local/nginx
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./staticfiles:/app/staticfiles
+      # Create a named volume
+      - logs_store:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - banker_local_nw
 
 networks:
   banker_local_nw:
@@ -52,3 +71,4 @@ networks:
 volumes:
   banker_local_db:
   mailpit_data:
+  logs_store:
