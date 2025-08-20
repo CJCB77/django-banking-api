@@ -16,9 +16,18 @@ services:
     depends_on:
       - postgres
       - mailpit
+      - redis 
+      - rabbitmq
     command: /start.sh
     networks:
       - banker_local_nw
+    healthcheck:
+      # This checks thar migrations are complete AND service is ready
+      test: ["CMD", "python", "manage.py", "health_check"]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+      start_period: 10s
 
   postgres:
     build:
@@ -32,6 +41,11 @@ services:
       - ./.envs/.env.local
     networks:
       - banker_local_nw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   
   mailpit:
     image: docker.io/axllent/mailpit:v1.20.3
@@ -48,13 +62,67 @@ services:
     networks:
       - banker_local_nw
   
+  redis:
+    image: redis:7.0-alpine3.19
+    # --appendonly logs every write operation to an append-only file on disk.
+    command: redis-server --appendonly yes
+    networks:
+      - banker_local_nw
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      # Main AMQP protocol port — this is how Celery workers & Django talk to RabbitMQ.
+      - "5672:5672" 
+      # HTTP management plugin port — this is the RabbitMQ Management UI where you can log in,
+      # check queues, and manage users
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_log:/var/log/rabbitmq
+    networks:
+      - banker_local_nw
+  
+  celery:
+    <<: *api
+    command: /start-celeryworker.sh
+  
+  flower:
+    <<: *api
+    ports:
+      - "5555:5555"
+    volumes:
+      - flower_db:/app/flower_db
+    command: /start-flower.sh
+  
+  celerybeat:
+    build:
+      context: .
+      dockerfile: ./docker/local/django/Dockerfile
+    command: /start-celerybeat.sh
+    env_file:
+      - ./.envs/.env.local
+    depends_on:
+      # api:
+      #   condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      postgres:
+        condition: service_started
+      api:
+        condition: service_healthy
+    networks:
+      - banker_local_nw
+      
   nginx:
     build:
       context: ./docker/local/nginx
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8080:80"
+      - "8090:80"
     volumes:
       - ./staticfiles:/app/staticfiles
       # Create a named volume
@@ -72,3 +140,6 @@ volumes:
   banker_local_db:
   mailpit_data:
   logs_store:
+  rabbitmq_data:
+  rabbitmq_log:
+  flower_db:
