@@ -2,7 +2,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from os import path, getenv
 from loguru import logger
-from datetime import timedelta
+from datetime import timedelta, date
 import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -145,6 +145,13 @@ STATIC_ROOT = str(BASE_DIR / "staticfiles")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "user_auth.CustomUser"
+# Defaults for the profiles
+DEFAULT_BIRTH_DATE = date(2000, 1, 1)
+DEFAULT_DATE_JOINED = date(2021, 1, 1)
+DEFAULT_EXPIRY_DATE = date(2024, 1, 1)
+DEFAULT_COUNTRY = "US"
+DEFAULT_PHONE_NUMBER = "+593 994233890"
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -244,3 +251,4 @@ LOGGING = {
     "handlers": {"loguru":{"class": "interceptor.InterceptHandler"}},
     "root": {"handlers": ["loguru"], "level": "DEBUG"},
 }
+

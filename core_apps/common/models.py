@@ -10,7 +10,7 @@ from django.utils import timezone
 User = get_user_model()
 
 class TimeStampedModel(models.Model):
-    creted_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -54,7 +54,7 @@ class ContentView(TimeStampedModel):
         )
 
     @classmethod
-    def record_view(cls, content_object: Any, user: Optional[User], viewer_ip: Optional[str] -> None):
+    def record_view(cls, content_object: Any, user: Optional[User], viewer_ip: Optional[str]) -> None:
         content_type = ContentType.objects.get_for_model(content_object)
         try:
             view, created = cls.objects.get_or_create(
